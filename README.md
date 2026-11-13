@@ -1,70 +1,50 @@
-Bank Customer Churn Prediction
-📌 Project Overview
+# Bank Customer Churn Prediction
 
-Customer churn is a critical challenge in the banking sector, as the loss of existing customers directly impacts revenue and increases customer acquisition costs. This project develops a machine-learning framework to predict customer churn using demographic, financial, and behavioural customer data.
+Predict which bank customers are likely to leave (churn), compare five models, and explain the best one with SHAP.
 
-The objective is to identify customers at high risk of attrition and evaluate multiple predictive models under consistent experimental conditions.
+- **Data:** Kaggle "Churn Modelling" dataset - 10,000 customers, about 20% churned.
+- **Notebook:** `customer_churn_prediction.ipynb` (all results below are printed in it).
 
-🎯 Objectives
+## Method
 
-• Analyse factors influencing customer churn
-• Build predictive models for churn classification
-• Address class imbalance using SMOTE
-• Compare classical and advanced machine-learning models
-• Apply explainable AI techniques for model interpretation
+1. Drop ID columns, encode Gender and Geography.
+2. Stratified 80/20 train/test split (8,000 / 2,000 customers).
+3. Scale features with StandardScaler (fitted on the training set only).
+4. Fix class imbalance with **SMOTE on the training set only** (1,630 -> 6,370 churn examples). The test set is left untouched.
+5. Train Logistic Regression, Random Forest, XGBoost, LightGBM and a small neural network (Keras).
+6. Explain the XGBoost model with SHAP.
 
-🧠 Models Implemented
+## Results on the test set (2,000 customers)
 
-• Logistic Regression
-• Random Forest
-• XGBoost
-• LightGBM
-• Artificial Neural Network (ANN)
+| Model | Accuracy | Precision | Recall | F1 | ROC-AUC |
+|---|---|---|---|---|---|
+| **XGBoost** | 0.856 | 0.657 | 0.607 | **0.631** | **0.870** |
+| Neural network | 0.833 | 0.578 | 0.658 | 0.615 | 0.857 |
+| LightGBM | 0.859 | 0.693 | 0.548 | 0.612 | 0.855 |
+| Random Forest | 0.842 | 0.614 | 0.602 | 0.608 | 0.850 |
+| Logistic Regression | 0.716 | 0.389 | 0.698 | 0.500 | 0.777 |
 
-⚙️ Techniques & Methodology
+Precision, recall and F1 are for the churn class.
 
-• Data preprocessing & feature engineering
-• Categorical feature encoding
-• Feature scaling (StandardScaler)
-• Class imbalance handling (SMOTE)
-• Model evaluation using:
+## What I learned
 
-    ✔ Accuracy
-    ✔ Precision
-    ✔ Recall
-    ✔ F1-score
-    ✔ ROC–AUC
+- **XGBoost was the best overall**, with the highest F1 and ROC-AUC.
+- **Accuracy alone is misleading here.** Predicting "nobody churns" would already be about 80% accurate. Recall and F1 on the churn class matter more.
+- Logistic Regression finds the most churners (recall 0.70) but with many false alarms (precision 0.39).
+- **Tuning did not help.** GridSearchCV gave a cross-validation ROC-AUC of 0.96, but the tuned model scored 0.847 on the test set, below the untuned 0.870. The cross-validation score was inflated because it was run on SMOTE-resampled data, where synthetic copies of the same customers appear in both the training and validation folds. A better approach is to put SMOTE inside the cross-validation pipeline.
+- **SHAP:** Age and number of products are the two strongest churn drivers, followed by tenure and whether the customer is an active member.
 
-• SHAP Explainability for feature importance analysis
+## Tools
 
-📊 Key Findings
+Python, Pandas, NumPy, scikit-learn, imbalanced-learn (SMOTE), XGBoost, LightGBM, TensorFlow / Keras, SHAP, Matplotlib, Seaborn.
 
-• Class imbalance significantly affects churn detection
-• SMOTE improves minority-class prediction performance
-• XGBoost achieved the most balanced overall performance
-• Customer Age, Number of Products, and Activity Status were the most influential churn drivers
+## Run it
 
-🛠 Tools & Technologies
+Open `customer_churn_prediction.ipynb` in Google Colab or Jupyter. Download `Churn_Modelling.csv` from Kaggle (the notebook can download it if you upload your own `kaggle.json`).
 
-Python
-Pandas / NumPy
-Scikit-learn
-XGBoost
-LightGBM
-TensorFlow / Keras
-SHAP
-Matplotlib / Seaborn
+## Files
 
-📈 Practical Relevance
-
-This project demonstrates how machine-learning models can support proactive customer retention strategies by identifying churn-prone customers and providing interpretable insights for decision-making.
-
-📂 Repository Structure
-data/        → Dataset reference  
-notebooks/   → Analysis & modelling notebooks  
-src/         → Model training scripts  
-outputs/     → Figures / evaluation visuals  
-
-🔗 Dataset Source
-
-Kaggle – Bank Customer Churn Modelling Dataset
+| File | What it is |
+|---|---|
+| `customer_churn_prediction.ipynb` | Full analysis: EDA, preprocessing, five models, SHAP, tuning |
+| `README.md` | This file |
